@@ -30,6 +30,7 @@ train_version() {
   # 5️⃣ Apply Feast features
   echo "🧩 Applying Feast feature store..."
   cd feature_repo
+  mkdir -p data
   feast apply
   cd ..
 
