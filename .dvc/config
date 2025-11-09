@@ -1,0 +1,4 @@
+[core]
+    remote = gcs_remote
+['remote "gcs_remote"']
+    url = gs://mlops-course-elemental-vent-474216-f5-oppe1-unique/dvc
