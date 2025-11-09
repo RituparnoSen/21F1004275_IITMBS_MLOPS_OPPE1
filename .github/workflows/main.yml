@@ -1,0 +1,69 @@
+name: MLOps OPPE1 Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  run-mlops-pipeline:
+    name: Run Full Pipeline (DVC + Feast + MLflow)
+    runs-on: ubuntu-latest
+
+    env:
+      GCP_PROJECT_ID: elemental-vent-474216-f5
+      GCS_BUCKET_NAME: mlops-course-elemental-vent-474216-f5-oppe1-unique
+      MLFLOW_TRACKING_URI: http://127.0.0.1:5000
+      PYTHONUNBUFFERED: 1
+
+    steps:
+      # 1️⃣ Checkout repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup Python
+      - name: Setup Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      # 3️⃣ Install System Dependencies
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y sqlite3 gcc g++ make
+
+      # 4️⃣ Install Python Dependencies
+      - name: Install Python Dependencies
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt
+
+      # 5️⃣ Authenticate with GCP
+      - name: Configure GCP credentials
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      # 6️⃣ Run full pipeline (v0 + v1)
+      - name: Run MLOps Pipeline
+        run: |
+          source .venv/bin/activate
+          chmod +x run_pipeline.sh
+          ./run_pipeline.sh
+
+      # 7️⃣ Upload logs and results
+      - name: Upload Pipeline Logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-logs
+          path: |
+            mlflow.db
+            feature_repo/registry.db
+            data/processed/
+            dvc.lock
+            dvc.yaml
+            run_pipeline.sh
