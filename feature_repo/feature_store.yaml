@@ -1,7 +1,14 @@
 project: stock_features
-registry: feature_repo/registry.db
+
+registry:
+  path: registry.db
+  cache_ttl_seconds: 60
+
 provider: local
 
 online_store:
   type: sqlite
-  path: feature_repo/data/online_store.db
+  path: data/online_store.db   # ✅ Corrected relative path
+
+offline_store:
+  type: file
